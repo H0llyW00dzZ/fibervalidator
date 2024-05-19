@@ -1,4 +1,6 @@
 # Fiber Validator Middleware
+[![Go Version](https://img.shields.io/badge/1.22.3-gray?style=flat&logo=go&logoWidth=15)](https://github.com/H0llyW00dzZ/FiberValidator/blob/master/go.mod#L3blob/master/go.mod#L3)
+[![Go Reference](https://pkg.go.dev/badge/github.com/H0llyW00dzZ/FiberValidator.svg)](https://pkg.go.dev/github.com/H0llyW00dzZ/FiberValidator) [![Go Report Card](https://goreportcard.com/badge/github.com/H0llyW00dzZ/FiberValidator)](https://goreportcard.com/report/github.com/H0llyW00dzZ/FiberValidator)
 
 This is a custom validator middleware for the Fiber web framework. It provides a flexible and extensible way to define and apply validation rules to incoming request bodies. The middleware allows for easy validation and sanitization of data, enforcement of specific field requirements, and ensures the integrity of the application's input.
 
