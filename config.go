@@ -25,6 +25,14 @@ type Config struct {
 	//
 	// Optional. Default: DefaultErrorHandler
 	ErrorHandler func(c *fiber.Ctx, err error) error
+
+	// ContextKey is the key used to store the validation result in the context.
+	//
+	// Note: This is most useful in advanced use cases for communicating internal context within the application,
+	// especially for securing authentication and authorization.
+	//
+	// Optional. Default: nil
+	ContextKey string
 }
 
 // ConfigDefault is the default configuration for the Validator middleware.
@@ -32,4 +40,5 @@ var ConfigDefault = Config{
 	Rules:        nil,
 	Next:         nil,
 	ErrorHandler: DefaultErrorHandler,
+	ContextKey:   "",
 }

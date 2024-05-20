@@ -27,8 +27,15 @@ func New(config ...Config) fiber.Handler {
 
 		for _, rule := range cfg.Rules {
 			if err := rule.Restrict(c); err != nil {
+				if cfg.ContextKey != "" {
+					c.Locals(cfg.ContextKey, err)
+				}
 				return cfg.ErrorHandler(c, err)
 			}
+		}
+
+		if cfg.ContextKey != "" {
+			c.Locals(cfg.ContextKey, nil)
 		}
 
 		return c.Next()

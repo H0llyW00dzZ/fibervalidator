@@ -757,3 +757,75 @@ func TestRestrictNumberWithMaxDigitsOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestValidatorWithContextKey(t *testing.T) {
+	app := fiber.New()
+
+	app.Use(validator.New(validator.Config{
+		Rules: []validator.Restrictor{
+			validator.RestrictUnicode{
+				Fields: []string{"name", "email"},
+			},
+		},
+		ContextKey: "validationResult",
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		},
+	}))
+
+	app.Post("/", func(c *fiber.Ctx) error {
+		validationResult := c.Locals("validationResult")
+		if validationResult != nil {
+			return c.Status(fiber.StatusBadRequest).SendString("Validation failed")
+		}
+		return c.SendString("OK")
+	})
+
+	testCases := []struct {
+		name           string
+		contentType    string
+		requestBody    string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "Valid request",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher","email":"gopher@example.com"}`,
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK",
+		},
+		{
+			name:           "Invalid request - Unicode in name",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gøpher","email":"gopher@example.com"}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "Unicode characters are not allowed in the 'name' field",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.requestBody))
+			req.Header.Set("Content-Type", tc.contentType)
+			resp, err := app.Test(req)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tc.expectedStatus {
+				t.Errorf("Expected status %d, got %d", tc.expectedStatus, resp.StatusCode)
+			}
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Unexpected error reading response body: %v", err)
+			}
+
+			if strings.TrimSpace(string(body)) != tc.expectedBody {
+				t.Errorf("Expected body '%s', got '%s'", tc.expectedBody, string(body))
+			}
+		})
+	}
+}
