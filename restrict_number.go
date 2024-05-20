@@ -63,7 +63,7 @@ func (r RestrictNumberOnly) restrictJSON(c *fiber.Ctx) error {
 	}
 
 	if len(invalidFields) > 0 {
-		return NewError(fiber.StatusBadRequest, fmt.Sprintf("The '%s' fields must contain only numbers", strings.Join(invalidFields, "', '")))
+		return NewError(fiber.StatusBadRequest, fmt.Sprintf(ErrFieldsMustContainNumbersOnly, strings.Join(invalidFields, "', '")))
 	}
 
 	return nil
@@ -101,7 +101,7 @@ func (r RestrictNumberOnly) restrictXML(c *fiber.Ctx) error {
 	}
 
 	if len(invalidFields) > 0 {
-		return NewError(fiber.StatusBadRequest, fmt.Sprintf("The '%s' fields must contain only numbers", strings.Join(invalidFields, "', '")))
+		return NewError(fiber.StatusBadRequest, fmt.Sprintf(ErrFieldsMustContainNumbersOnly, strings.Join(invalidFields, "', '")))
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func (r RestrictNumberOnly) restrictOther(c *fiber.Ctx) error {
 	}
 
 	if len(invalidFields) > 0 {
-		return NewError(fiber.StatusBadRequest, fmt.Sprintf("The '%s' fields must contain only numbers", strings.Join(invalidFields, "', '")))
+		return NewError(fiber.StatusBadRequest, fmt.Sprintf(ErrFieldsMustContainNumbersOnly, strings.Join(invalidFields, "', '")))
 	}
 
 	return nil

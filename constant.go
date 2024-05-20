@@ -21,6 +21,9 @@ const (
 
 	// ErrFieldExceedsMaximumValue represents an error message for a field that exceeds the maximum allowed value.
 	ErrFieldExceedsMaximumValue = "The '%s' field must not exceed %d"
+
+	// ErrFieldsMustContainNumbersOnly represents an error message for multiple fields that must contain only numbers.
+	ErrFieldsMustContainNumbersOnly = "The '%s' fields must contain only numbers"
 )
 
 const (
