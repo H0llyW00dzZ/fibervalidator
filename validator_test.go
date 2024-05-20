@@ -635,3 +635,125 @@ func TestRestrictNumberOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestRestrictNumberWithMaxDigitsOnly(t *testing.T) {
+	app := fiber.New()
+
+	app.Use(validator.New(validator.Config{
+		Rules: []validator.Restrictor{
+			validator.RestrictNumberOnly{
+				Fields:    []string{"grilled_fish", "lobster_roll", "seafood_platter", "bali_juice"},
+				Max:       ptr(100),
+				MaxDigits: ptr(3),
+			},
+		},
+	}))
+
+	app.Post("/", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
+
+	testCases := []struct {
+		name           string
+		contentType    string
+		requestBody    string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "Valid JSON request",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"grilled_fish":30,"lobster_roll":80,"seafood_platter":50,"bali_juice":10}`,
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK",
+		},
+		{
+			name:           "Invalid JSON request - grilled_fish exceeds maximum digits",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"grilled_fish":1234,"lobster_roll":80,"seafood_platter":50,"bali_juice":10}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'grilled_fish' field must not exceed 3 digits"}`,
+		},
+		{
+			name:           "Invalid XML request - lobster_roll exceeds maximum digits",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><grilled_fish>30</grilled_fish><lobster_roll>1234</lobster_roll><seafood_platter>50</seafood_platter><bali_juice>10</bali_juice></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;lobster_roll&#39; field must not exceed 3 digits</error></xmlError>`,
+		},
+		{
+			name:           "Invalid Other Content-Type - seafood_platter exceeds maximum digits",
+			contentType:    "text/plain",
+			requestBody:    "grilled_fish=30&lobster_roll=80&seafood_platter=1234&bali_juice=10",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'seafood_platter' field must not exceed 3 digits",
+		},
+		{
+			name:           "Invalid JSON request - grilled_fish and lobster_roll exceed maximum digits",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"grilled_fish":1234,"lobster_roll":5678,"seafood_platter":50,"bali_juice":10}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'grilled_fish' field must not exceed 3 digits"}`,
+		},
+		{
+			name:           "Invalid XML request - grilled_fish, lobster_roll, and seafood_platter exceed maximum digits",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><grilled_fish>1234</grilled_fish><lobster_roll>5678</lobster_roll><seafood_platter>9012</seafood_platter><bali_juice>10</bali_juice></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;grilled_fish&#39; field must not exceed 3 digits</error></xmlError>`,
+		},
+		{
+			name:           "Invalid Other Content-Type - grilled_fish and seafood_platter exceed maximum digits",
+			contentType:    "text/plain",
+			requestBody:    "grilled_fish=1234&lobster_roll=80&seafood_platter=5678&bali_juice=10",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'grilled_fish' field must not exceed 3 digits",
+		},
+		{
+			name:           "Invalid JSON request - bali_juice exceeds maximum digits",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"grilled_fish":30,"lobster_roll":80,"seafood_platter":50,"bali_juice":1234}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'bali_juice' field must not exceed 3 digits"}`,
+		},
+		{
+			name:           "Invalid XML request - bali_juice exceeds maximum digits",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><grilled_fish>30</grilled_fish><lobster_roll>80</lobster_roll><seafood_platter>50</seafood_platter><bali_juice>1234</bali_juice></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;bali_juice&#39; field must not exceed 3 digits</error></xmlError>`,
+		},
+		{
+			name:           "Invalid Other Content-Type - bali_juice exceeds maximum digits",
+			contentType:    "text/plain",
+			requestBody:    "grilled_fish=30&lobster_roll=80&seafood_platter=50&bali_juice=1234",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'bali_juice' field must not exceed 3 digits",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.requestBody))
+			req.Header.Set("Content-Type", tc.contentType)
+			resp, err := app.Test(req)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tc.expectedStatus {
+				t.Errorf("Expected status %d, got %d", tc.expectedStatus, resp.StatusCode)
+			}
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Unexpected error reading response body: %v", err)
+			}
+
+			if strings.TrimSpace(string(body)) != tc.expectedBody {
+				t.Errorf("Expected body '%s', got '%s'", tc.expectedBody, string(body))
+			}
+		})
+	}
+}
