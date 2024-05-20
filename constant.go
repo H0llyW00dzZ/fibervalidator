@@ -27,6 +27,14 @@ const (
 )
 
 const (
+	// ErrFieldExceedsMaximumLength represents an error message for a field that exceeds the maximum allowed length.
+	ErrFieldExceedsMaximumLength = "The '%s' field must not exceed %d characters"
+
+	// ErrFieldsExceedMaximumLength represents an error message for fields that exceed the maximum allowed length.
+	ErrFieldsExceedMaximumLength = "The '%s' fields must not exceed the maximum length"
+)
+
+const (
 	// Define the range of numeric characters
 	numericStart = '0' + iota
 	numericEnd   = '9'

@@ -829,3 +829,152 @@ func TestValidatorWithContextKey(t *testing.T) {
 		})
 	}
 }
+
+func TestRestrictStringLength(t *testing.T) {
+	app := fiber.New()
+
+	app.Use(validator.New(validator.Config{
+		Rules: []validator.Restrictor{
+			validator.RestrictStringLength{
+				Fields:    []string{"name", "description"},
+				MaxLength: ptr(50),
+			},
+		},
+	}))
+
+	app.Post("/", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
+
+	testCases := []struct {
+		name           string
+		contentType    string
+		requestBody    string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "Valid JSON request",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher","description":"A short description"}`,
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK",
+		},
+		{
+			name:           "Invalid JSON request - name exceeds maximum length",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher with a very long name that exceeds the maximum length","description":"A short description"}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'name' field must not exceed 50 characters"}`,
+		},
+		{
+			name:           "Invalid JSON request - description exceeds maximum length",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher","description":"A very long description that exceeds the maximum length limit"}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'description' field must not exceed 50 characters"}`,
+		},
+		{
+			name:           "Invalid JSON request - invalid JSON body",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher","description":"A short description"`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"Invalid JSON request body"}`,
+		},
+		{
+			name:           "Invalid JSON request - multiple fields exceed maximum length",
+			contentType:    fiber.MIMEApplicationJSON,
+			requestBody:    `{"name":"Gopher with a very long name that exceeds the maximum length","description":"A very long description that exceeds the maximum length limit"}`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"The 'name' field must not exceed 50 characters"}`,
+		},
+		{
+			name:           "Valid XML request",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><name>Gopher</name><description>A short description</description></data>`,
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK",
+		},
+		{
+			name:           "Invalid XML request - name exceeds maximum length",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><name>Gopher with a very long name that exceeds the maximum length</name><description>A short description</description></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;name&#39; field must not exceed 50 characters</error></xmlError>`,
+		},
+		{
+			name:           "Invalid XML request - description exceeds maximum length",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><name>Gopher</name><description>A very long description that exceeds the maximum length limit</description></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;description&#39; field must not exceed 50 characters</error></xmlError>`,
+		},
+		{
+			name:           "Invalid XML request - invalid XML body",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><name>Gopher</name><description>A short description</description>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>Invalid XML request body</error></xmlError>`,
+		},
+		{
+			name:           "Invalid XML request - multiple fields exceed maximum length",
+			contentType:    fiber.MIMEApplicationXML,
+			requestBody:    `<data><name>Gopher with a very long name that exceeds the maximum length</name><description>A very long description that exceeds the maximum length limit</description></data>`,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `<xmlError><error>The &#39;name&#39; field must not exceed 50 characters</error></xmlError>`,
+		},
+		{
+			name:           "Valid Other Content-Type request",
+			contentType:    "text/plain",
+			requestBody:    "name=Gopher&description=A short description",
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK",
+		},
+		{
+			name:           "Invalid Other Content-Type - name exceeds maximum length",
+			contentType:    "text/plain",
+			requestBody:    "name=Gopher with a very long name that exceeds the maximum length&description=A short description",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'name' field must not exceed 50 characters",
+		},
+		{
+			name:           "Invalid Other Content-Type - description exceeds maximum length",
+			contentType:    "text/plain",
+			requestBody:    "name=Gopher&description=A very long description that exceeds the maximum length limit",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'description' field must not exceed 50 characters",
+		},
+		{
+			name:           "Invalid Other Content-Type - multiple fields exceed maximum length",
+			contentType:    "text/plain",
+			requestBody:    "name=Gopher with a very long name that exceeds the maximum length&description=A very long description that exceeds the maximum length limit",
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   "The 'name' field must not exceed 50 characters",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.requestBody))
+			req.Header.Set("Content-Type", tc.contentType)
+			resp, err := app.Test(req)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tc.expectedStatus {
+				t.Errorf("Expected status %d, got %d", tc.expectedStatus, resp.StatusCode)
+			}
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Fatalf("Unexpected error reading response body: %v", err)
+			}
+
+			if strings.TrimSpace(string(body)) != tc.expectedBody {
+				t.Errorf("Expected body '%s', got '%s'", tc.expectedBody, string(body))
+			}
+		})
+	}
+}
