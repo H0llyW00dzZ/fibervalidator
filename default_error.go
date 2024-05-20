@@ -28,7 +28,34 @@ func (e *Error) Error() string {
 // DefaultErrorHandler is the default error handler function.
 func DefaultErrorHandler(c *fiber.Ctx, err error) error {
 	if e, ok := err.(*Error); ok {
-		return c.Status(e.Status).SendString(e.Message)
+		return restrictByContentType(c, jsonErrorHandler(e), xmlErrorHandler(e), defaultErrorHandler(e))
 	}
 	return err
+}
+
+// jsonErrorHandler formats the error as JSON.
+func jsonErrorHandler(e *Error) func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		return c.Status(e.Status).JSON(fiber.Map{
+			"error": e.Message,
+		})
+	}
+}
+
+// xmlErrorHandler formats the error as XML.
+type xmlError struct {
+	Error string `xml:"error"`
+}
+
+func xmlErrorHandler(e *Error) func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		return c.Status(e.Status).XML(xmlError{Error: e.Message})
+	}
+}
+
+// defaultErrorHandler sends the error as plain text.
+func defaultErrorHandler(e *Error) func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		return c.Status(e.Status).SendString(e.Message)
+	}
 }
