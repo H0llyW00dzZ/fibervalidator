@@ -135,3 +135,17 @@ Contributions are welcome! If there are any issues or suggestions for improvemen
 ## License
 
 This project is licensed under the BSD License. See the [LICENSE](LICENSE) file for details.
+
+
+## Benchmark
+
+```sh
+goos: windows
+goarch: amd64
+pkg: github.com/H0llyW00dzZ/FiberValidator
+cpu: AMD Ryzen 9 3900X 12-Core Processor            
+BenchmarkValidatorWithSonicJSON/Valid_JSON_request-24         	   45967	     24768 ns/op	   16464 B/op	      86 allocs/op
+BenchmarkValidatorWithStandardJSON/Valid_JSON_request-24      	   43248	     27835 ns/op	   16624 B/op	     112 allocs/op
+BenchmarkValidatorWithDefaultXML/Valid_XML_request-24         	   28101	     42913 ns/op	   23223 B/op	     212 allocs/op
+BenchmarkValidatorWithCustomXML/Valid_XML_request-24          	   28191	     43596 ns/op	   23248 B/op	     212 allocs/op
+```
