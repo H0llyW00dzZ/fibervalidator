@@ -10,6 +10,8 @@ import (
 
 // containsUnicode checks if a string contains Unicode characters.
 // It returns true if any character is outside the ASCII range.
+//
+// Note: This is a slick way to boost performance, leaving regex in the dust.
 func containsUnicode(str string) bool {
 	for i := 0; i < len(str); i++ {
 		if str[i] > 127 { // ASCII range is from 0 to 127
