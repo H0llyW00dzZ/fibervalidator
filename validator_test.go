@@ -365,7 +365,7 @@ func TestValidatorWithInvalidJSONBody(t *testing.T) {
 			name:           "Invalid JSON - Non-numeric age",
 			requestBody:    `{"name":"Gopher","email":"gopher@example.com","age":"abc"}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "The 'age' fields must contain only numbers",
+			expectedError:  "The 'age' field must contain only numbers",
 		},
 	}
 
@@ -439,7 +439,7 @@ func TestValidatorWithInvalidXMLBody(t *testing.T) {
 			name:           "Invalid XML - Non-numeric score",
 			requestBody:    `<data><name>Gopher</name><email>gopher@example.com</email><score>abc</score></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  `<xmlError><error>The &#39;score&#39; fields must contain only numbers</error></xmlError>`,
+			expectedError:  `<xmlError><error>The &#39;score&#39; field must contain only numbers</error></xmlError>`,
 		},
 	}
 
@@ -508,14 +508,14 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":80,"seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `{"error":"The 'age' fields must contain only numbers"}`,
+			expectedBody:   `{"error":"The 'age' field must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - non-numeric score",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":30,"score":"def","seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `{"error":"The 'score' fields must contain only numbers"}`,
+			expectedBody:   `{"error":"The 'score' field must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - age exceeds maximum",
@@ -536,14 +536,14 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>abc</age><score>80</score><seafood_price>50</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `<xmlError><error>The &#39;age&#39; fields must contain only numbers</error></xmlError>`,
+			expectedBody:   `<xmlError><error>The &#39;age&#39; field must contain only numbers</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML request - non-numeric score",
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>30</age><score>def</score><seafood_price>50</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `<xmlError><error>The &#39;score&#39; fields must contain only numbers</error></xmlError>`,
+			expectedBody:   `<xmlError><error>The &#39;score&#39; field must contain only numbers</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML request - score exceeds maximum",
@@ -564,21 +564,21 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    "text/plain",
 			requestBody:    "age=gh0per&score=80&seafood_price=50",
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' fields must contain only numbers",
+			expectedBody:   "The 'age' field must contain only numbers",
 		},
 		{
 			name:           "Invalid JSON request - non-numeric age and score",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":"xa","seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `{"error":"The 'age', 'score' fields must contain only numbers"}`,
+			expectedBody:   `{"error":"The 'age', 'score' field must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - non-numeric age, score, and seafood_price",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":"def","seafood_price":"ghi"}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `{"error":"The 'age', 'score', 'seafood_price' fields must contain only numbers"}`,
+			expectedBody:   `{"error":"The 'age', 'score', 'seafood_price' field must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - age and seafood_price exceed maximum",
@@ -592,7 +592,7 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>30</age><score>abc</score><seafood_price>def</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "<xmlError><error>The &#39;score&#39;, &#39;seafood_price&#39; fields must contain only numbers</error></xmlError>",
+			expectedBody:   "<xmlError><error>The &#39;score&#39;, &#39;seafood_price&#39; field must contain only numbers</error></xmlError>",
 		},
 		{
 			name:           "Invalid XML request - age and score exceed maximum",

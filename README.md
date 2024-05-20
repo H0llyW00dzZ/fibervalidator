@@ -149,3 +149,20 @@ BenchmarkValidatorWithStandardJSON/Valid_JSON_request-24      	   43248	     278
 BenchmarkValidatorWithDefaultXML/Valid_XML_request-24         	   28101	     42913 ns/op	   23223 B/op	     212 allocs/op
 BenchmarkValidatorWithCustomXML/Valid_XML_request-24          	   28191	     43596 ns/op	   23248 B/op	     212 allocs/op
 ```
+
+#### Updated:
+
+```sh
+goos: windows
+goarch: amd64
+pkg: github.com/H0llyW00dzZ/FiberValidator
+cpu: AMD Ryzen 9 3900X 12-Core Processor            
+BenchmarkValidatorWithSonicJSONSeafood/Valid_JSON_request-24         	   46785	     24696 ns/op	   16447 B/op	      86 allocs/op
+BenchmarkValidatorWithStandardJSONSeafood/Valid_JSON_request-24      	   42541	     28542 ns/op	   16672 B/op	     112 allocs/op
+BenchmarkValidatorWithDefaultXMLSeafood/Valid_XML_request-24         	   26637	     44806 ns/op	   23450 B/op	     213 allocs/op
+BenchmarkValidatorWithCustomXMLSeafood/Valid_XML_request-24          	   26622	     45684 ns/op	   23458 B/op	     213 allocs/op
+BenchmarkValidatorWithSonicJSON/Valid_JSON_request-24                	   50625	     24377 ns/op	   16410 B/op	      86 allocs/op
+BenchmarkValidatorWithStandardJSON/Valid_JSON_request-24             	   42150	     27954 ns/op	   16626 B/op	     112 allocs/op
+BenchmarkValidatorWithDefaultXML/Valid_XML_request-24                	   27764	     43721 ns/op	   23244 B/op	     212 allocs/op
+BenchmarkValidatorWithCustomXML/Valid_XML_request-24                 	   27417	     43951 ns/op	   23256 B/op	     212 allocs/op
+```
