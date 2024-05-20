@@ -7,8 +7,9 @@ This is a custom validator middleware for the Fiber web framework. It provides a
 The middleware currently supports the following features:
 - Validation of request bodies in various formats, including JSON, XML, and other content types
 - Restriction of Unicode characters in specified fields
-- Customizable error handling
+- Customizable error handling based on content type
 - Conditional validation skipping based on custom logic
+- Restriction of fields to contain only numbers with an optional maximum value
 
 More features and validation capabilities will be added in the future to enhance the middleware's functionality and cater to a wider range of validation scenarios.
 
@@ -100,9 +101,13 @@ func (r RestrictUnicode) Restrict(c *fiber.Ctx) error {
 
 ### Error Handling
 
-By default, the validator middleware uses a default error handler that returns a JSON response with an "error" field containing the error message.
+The validator middleware provides a default error handler that formats the error response based on the content type of the request. It supports JSON, XML, and plain text formats.
 
-To provide a custom error handler function to handle the error response differently, the custom error handler should have the following signature:
+- For JSON requests, the error response is formatted as `{"error": "Error message"}`.
+- For XML requests, the error response is formatted as `<xmlError><error>Error message</error></xmlError>`.
+- For other content types, the error response is sent as plain text.
+
+You can customize the error handling behavior by providing a custom error handler function in the `ErrorHandler` field of the `validator.Config` struct. The custom error handler should have the following signature:
 
 ```go
 func(c *fiber.Ctx, err error) error
@@ -112,9 +117,16 @@ Example custom error handler:
 
 ```go
 func customErrorHandler(c *fiber.Ctx, err error) error {
-	return c.Status(fiber.StatusUnprocessableEntity).SendString(err.Error())
+	if e, ok := err.(*validator.Error); ok {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"custom_error": e.Message,
+		})
+	}
+	return err
 }
 ```
+
+In this example, the custom error handler checks if the error is of type `*validator.Error` and returns a JSON response with a custom error format.
 
 ## Contributing
 
