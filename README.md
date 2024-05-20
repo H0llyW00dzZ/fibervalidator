@@ -188,6 +188,26 @@ BenchmarkValidatorWithDefaultXML/Valid_XML_request-24                           
 BenchmarkValidatorWithCustomXML/Valid_XML_request-24                                         	   27990	     43546 ns/op	   23264 B/op	     212 allocs/op
 ```
 
+```sh
+goos: windows
+goarch: amd64
+pkg: github.com/H0llyW00dzZ/FiberValidator
+cpu: AMD Ryzen 9 3900X 12-Core Processor            
+BenchmarkRestrictStringLengthLongDescriptionSonicJSON/Valid_JSON_long_description-24         	   51478	     21306 ns/op	   19331 B/op	      58 allocs/op
+BenchmarkRestrictStringLengthLongDescriptionStandardJSON/Valid_JSON_long_description-24      	   47730	     25044 ns/op	   19240 B/op	      65 allocs/op
+BenchmarkRestrictStringLengthLongDescriptionDefaultXML/Valid_XML_long_description-24         	   30450	     39450 ns/op	   25025 B/op	     111 allocs/op
+BenchmarkRestrictStringLengthLongDescriptionCustomXML/Valid_XML_long_description-24          	   29910	     40017 ns/op	   25025 B/op	     111 allocs/op
+BenchmarkValidatorWithSonicJSONSeafood/Valid_JSON_request-24                                 	   60594	     20457 ns/op	   14826 B/op	      68 allocs/op
+BenchmarkValidatorWithStandardJSONSeafood/Valid_JSON_request-24                              	   50836	     23481 ns/op	   15081 B/op	      94 allocs/op
+BenchmarkValidatorWithDefaultXMLSeafood/Valid_XML_request-24                                 	   30085	     40004 ns/op	   21815 B/op	     195 allocs/op
+BenchmarkValidatorWithCustomXMLSeafood/Valid_XML_request-24                                  	   29608	     40108 ns/op	   21819 B/op	     195 allocs/op
+BenchmarkValidatorWithSonicJSON/Valid_JSON_request-24                                        	   61047	     20826 ns/op	   14801 B/op	      68 allocs/op
+BenchmarkValidatorWithStandardJSON/Valid_JSON_request-24                                     	   51811	     23220 ns/op	   15045 B/op	      94 allocs/op
+BenchmarkValidatorWithDefaultXML/Valid_XML_request-24                                        	   31850	     38777 ns/op	   21632 B/op	     194 allocs/op
+BenchmarkValidatorWithCustomXML/Valid_XML_request-24                                         	   30577	     39133 ns/op	   21633 B/op	     194 allocs/op
+```
+
+
 > [!NOTE]
 > Based on the benchmark results, the following observations can be made:
 >
