@@ -5,6 +5,8 @@
 package validator_test
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -123,8 +125,28 @@ func TestValidatorWithDefaultErrorHandler(t *testing.T) {
 			}
 
 			if tc.expectedError != "" {
-				if string(body) != tc.expectedError {
-					t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, string(body))
+				if tc.contentType == fiber.MIMEApplicationJSON {
+					var jsonResp map[string]string
+					if err := json.Unmarshal(body, &jsonResp); err != nil {
+						t.Fatalf("Unexpected error unmarshaling JSON response: %v", err)
+					}
+					if jsonResp["error"] != tc.expectedError {
+						t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, jsonResp["error"])
+					}
+				} else if tc.contentType == fiber.MIMEApplicationXML {
+					var xmlResp struct {
+						Error string `xml:"error"`
+					}
+					if err := xml.Unmarshal(body, &xmlResp); err != nil {
+						t.Fatalf("Unexpected error unmarshaling XML response: %v", err)
+					}
+					if xmlResp.Error != tc.expectedError {
+						t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, xmlResp.Error)
+					}
+				} else {
+					if string(body) != tc.expectedError {
+						t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, string(body))
+					}
 				}
 			} else {
 				if string(body) != "OK" {
@@ -265,7 +287,7 @@ func TestValidatorWithNext(t *testing.T) {
 			contentType:    "application/json",
 			requestBody:    `{"name":"Gøpher","email":"gopher@example.com"}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Unicode characters are not allowed in the 'name' field",
+			expectedBody:   `{"error":"Unicode characters are not allowed in the 'name' field"}`,
 		},
 		{
 			name:           "GET request - validation skipped",
@@ -366,8 +388,12 @@ func TestValidatorWithInvalidJSONBody(t *testing.T) {
 				t.Fatalf("Unexpected error reading response body: %v", err)
 			}
 
-			if string(body) != tc.expectedError {
-				t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, string(body))
+			var jsonResp map[string]string
+			if err := json.Unmarshal(body, &jsonResp); err != nil {
+				t.Fatalf("Unexpected error unmarshaling JSON response: %v", err)
+			}
+			if jsonResp["error"] != tc.expectedError {
+				t.Errorf("Expected error message '%s', got '%s'", tc.expectedError, jsonResp["error"])
 			}
 		})
 	}
@@ -401,19 +427,19 @@ func TestValidatorWithInvalidXMLBody(t *testing.T) {
 			name:           "Invalid XML - Incomplete body",
 			requestBody:    `<data><name>Gopher</name><email>gopher@example.com</data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "Invalid XML request body",
+			expectedError:  `<xmlError><error>Invalid XML request body</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML - Unicode in email",
 			requestBody:    `<data><name>Gopher</name><email>gøpher@example.com</email></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "Unicode characters are not allowed in the 'email' field",
+			expectedError:  `<xmlError><error>Unicode characters are not allowed in the &#39;email&#39; field</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML - Non-numeric score",
 			requestBody:    `<data><name>Gopher</name><email>gopher@example.com</email><score>abc</score></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "The 'score' fields must contain only numbers",
+			expectedError:  `<xmlError><error>The &#39;score&#39; fields must contain only numbers</error></xmlError>`,
 		},
 	}
 
@@ -482,21 +508,21 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":80,"seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' fields must contain only numbers",
+			expectedBody:   `{"error":"The 'age' fields must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - non-numeric score",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":30,"score":"def","seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'score' fields must contain only numbers",
+			expectedBody:   `{"error":"The 'score' fields must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - age exceeds maximum",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":120,"score":80,"seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' field must not exceed 100",
+			expectedBody:   `{"error":"The 'age' field must not exceed 100"}`,
 		},
 		{
 			name:           "Valid XML request",
@@ -510,21 +536,21 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>abc</age><score>80</score><seafood_price>50</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' fields must contain only numbers",
+			expectedBody:   `<xmlError><error>The &#39;age&#39; fields must contain only numbers</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML request - non-numeric score",
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>30</age><score>def</score><seafood_price>50</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'score' fields must contain only numbers",
+			expectedBody:   `<xmlError><error>The &#39;score&#39; fields must contain only numbers</error></xmlError>`,
 		},
 		{
 			name:           "Invalid XML request - score exceeds maximum",
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>30</age><score>120</score><seafood_price>50</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'score' field must not exceed 100",
+			expectedBody:   `<xmlError><error>The &#39;score&#39; field must not exceed 100</error></xmlError>`,
 		},
 		{
 			name:           "Invalid Other Content-Type - age exceeds maximum",
@@ -545,35 +571,35 @@ func TestRestrictNumberOnly(t *testing.T) {
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":"xa","seafood_price":50}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age', 'score' fields must contain only numbers",
+			expectedBody:   `{"error":"The 'age', 'score' fields must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - non-numeric age, score, and seafood_price",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":"abc","score":"def","seafood_price":"ghi"}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age', 'score', 'seafood_price' fields must contain only numbers",
+			expectedBody:   `{"error":"The 'age', 'score', 'seafood_price' fields must contain only numbers"}`,
 		},
 		{
 			name:           "Invalid JSON request - age and seafood_price exceed maximum",
 			contentType:    fiber.MIMEApplicationJSON,
 			requestBody:    `{"age":120,"score":80,"seafood_price":150}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' field must not exceed 100",
+			expectedBody:   `{"error":"The 'age' field must not exceed 100"}`,
 		},
 		{
 			name:           "Invalid XML request - non-numeric score and seafood_price",
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>30</age><score>abc</score><seafood_price>def</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'score', 'seafood_price' fields must contain only numbers",
+			expectedBody:   "<xmlError><error>The &#39;score&#39;, &#39;seafood_price&#39; fields must contain only numbers</error></xmlError>",
 		},
 		{
 			name:           "Invalid XML request - age and score exceed maximum",
 			contentType:    fiber.MIMEApplicationXML,
 			requestBody:    `<data><age>120</age><score>150</score><seafood_price>80</seafood_price></data>`,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "The 'age' field must not exceed 100",
+			expectedBody:   "<xmlError><error>The &#39;age&#39; field must not exceed 100</error></xmlError>",
 		},
 		{
 			name:           "Invalid Other Content-Type - seafood_price exceeds maximum",
