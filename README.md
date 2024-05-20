@@ -11,6 +11,7 @@ The middleware currently supports the following features:
 - Conditional validation skipping based on custom logic
 - Restriction of fields to contain only numbers with an optional maximum value
 - Storing validation results in the request context for advanced use cases
+- Restriction of string length for specified fields with a configurable maximum length
 
 More features and validation capabilities will be added in the future to enhance the middleware's functionality and cater to a wider range of validation scenarios.
 
