@@ -47,6 +47,10 @@ func (r RestrictUnicode) restrictJSON(c *fiber.Ctx) error {
 }
 
 // restrictXML checks the specified fields in the XML request body for Unicode characters.
+//
+// Note: This function harnesses the power of magic reflection to conjure up a struct type from the given fields
+// and breathe life into it with data from the XML request body. Magic reflection is a double-edged sword—
+// powerful yet intricate—that allows for shapeshifting object types at runtime. It's no walk in the park, especially when wrestling with XML Hahaha.
 func (r RestrictUnicode) restrictXML(c *fiber.Ctx) error {
 	fields := make([]reflect.StructField, len(r.Fields))
 	caser := cases.Title(language.English)
