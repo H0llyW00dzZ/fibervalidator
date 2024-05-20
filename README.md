@@ -10,6 +10,7 @@ The middleware currently supports the following features:
 - Customizable error handling based on content type
 - Conditional validation skipping based on custom logic
 - Restriction of fields to contain only numbers with an optional maximum value
+- Storing validation results in the request context for advanced use cases
 
 More features and validation capabilities will be added in the future to enhance the middleware's functionality and cater to a wider range of validation scenarios.
 
