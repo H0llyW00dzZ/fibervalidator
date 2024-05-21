@@ -29,6 +29,11 @@ The middleware currently supports the following features:
 
 More features and validation capabilities will be added in the future to enhance the middleware's functionality and cater to a wider range of validation scenarios.
 
+> [!NOTE]  
+> This repository will focus on maintaining and adding more features only for Fiber v2 for the following reasons:
+> - Fiber v2 is already stable
+> - It's easy to implement middleware features that are missing (since I am familiar with many Fiber 2 signatures) or other.
+
 ## Benchmark
 
 ```sh
