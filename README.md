@@ -4,14 +4,28 @@
 
 This is a custom validator middleware for the Fiber web framework. It provides a flexible and extensible way to define and apply validation rules to incoming request bodies. The middleware allows for easy validation and sanitization of data, enforcement of specific field requirements, and ensures the integrity of the application's input.
 
+## Features
+
 The middleware currently supports the following features:
+
+### Request Body Validation
 - Validation of request bodies in various formats, including JSON, XML, and other content types
-- Restriction of Unicode characters in specified fields
 - Customizable error handling based on content type
+
+### Unicode Restriction
+- Restriction of Unicode characters in specified fields
+
+### Conditional Validation
 - Conditional validation skipping based on custom logic
+
+### Number Restriction
 - Restriction of fields to contain only numbers with an optional maximum value
-- Storing validation results in the request context for advanced use cases
+
+### String Length Restriction
 - Restriction of string length for specified fields with a configurable maximum length
+
+### Advanced Use Cases
+- Storing validation results in the request context for advanced use cases
 
 More features and validation capabilities will be added in the future to enhance the middleware's functionality and cater to a wider range of validation scenarios.
 
