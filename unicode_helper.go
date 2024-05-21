@@ -12,6 +12,9 @@ import (
 // It returns true if any character is outside the ASCII range.
 //
 // Note: This is a slick way to boost performance, leaving regex in the dust.
+// Additionally, there is another method similar to this one (iterating over runes),
+// however its performance is somewhat slower. So this improvement performs better because it
+// uses bytes and has zer0-allocations.
 func containsUnicode(str string) bool {
 	for i := 0; i < len(str); i++ {
 		if str[i] > 127 { // ASCII range is from 0 to 127
