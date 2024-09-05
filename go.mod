@@ -6,7 +6,7 @@ require (
 	github.com/bytedance/sonic v1.12.2
 	github.com/clbanning/mxj v1.8.4
 	github.com/gofiber/fiber/v2 v2.52.5
-	golang.org/x/text v0.17.0
+	golang.org/x/text v0.18.0
 )
 
 require (
