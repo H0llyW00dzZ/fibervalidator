@@ -1,12 +1,13 @@
 module github.com/H0llyW00dzZ/FiberValidator
 
-go 1.22.3
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
 	github.com/bytedance/sonic v1.13.2
 	github.com/clbanning/mxj v1.8.4
-	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/fiber/v2 v2.52.9
 	golang.org/x/text v0.23.0
 )
 
