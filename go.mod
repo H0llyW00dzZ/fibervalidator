@@ -1,10 +1,11 @@
 module github.com/H0llyW00dzZ/FiberValidator
 
-go 1.22.3
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
-	github.com/bytedance/sonic v1.13.2
+	github.com/bytedance/sonic v1.14.2
 	github.com/clbanning/mxj v1.8.4
 	github.com/gofiber/fiber/v2 v2.52.6
 	golang.org/x/text v0.23.0
@@ -12,11 +13,12 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/bytedance/sonic/loader v0.2.4 // indirect
-	github.com/cloudwego/base64x v0.1.5 // indirect
+	github.com/bytedance/gopkg v0.1.3 // indirect
+	github.com/bytedance/sonic/loader v0.4.0 // indirect
+	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
-	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
